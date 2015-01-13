@@ -1,17 +1,19 @@
-string functionSwitchRotor = "FunctionSwitchRotor";
-string currentFunction;
+string 	functionSwitchRotor = "FunctionSwitchRotor";
+string 	currentFunction;
+int 	functionSwitchFactor = 3;	     	
+
 
 Dictionary<int, string> programms = new Dictionary<int, string>{ 
 						    { 0, "help" },
-						    { 3, "level" },
-						    { 6, "cargo" },
+						    { 1, "level" },
+						    { 2, "cargo" },
 					     };
 
 
-string[] cargoNames = { "8472 Cargo", "8472 Drill" }; 
-string overallName = "8472 Cockpit"; 
+string[] 	cargoNames	= { "8472 Cargo", "8472 Drill" }; 
+string 		overallName 	= "8472 Cockpit"; 
 
-string dumpName      = "8472 Cockpit"; 
+string 		dumpName 	= "8472 Cockpit"; 
 Dictionary<string, double> cargoAmount;
 
 void Main()
@@ -58,7 +60,7 @@ string GetProgrammNameByRotor(string rotorName)
     int vel;
     if (block != null)
     {   
-	vel = (int) Math.Round(block.Velocity);    
+	vel = (int) Math.Round(block.Velocity / functionSwitchFactor);    
     	if (programms.ContainsKey(vel))
     	{
 		return programms[vel];
