@@ -2,12 +2,12 @@ string 	functionSwitchRotor = "FunctionSwitchRotor";
 string 	currentFunction;
 int 	functionSwitchFactor = 3;	     	
 
-
-Dictionary<int, string> programms = new Dictionary<int, string>{ 
-						    { 0, "help" },
-						    { 1, "level" },
-						    { 2, "cargo" },
-					     };
+Dictionary<int, string> programms = new Dictionary<int, string>
+{ 
+	{ 0, "help" },
+	{ 1, "level" },
+	{ 2, "cargo" },
+};
 
 
 string[] 	cargoNames	= { "8472 Cargo", "8472 Drill" }; 
@@ -55,18 +55,18 @@ string chooseFunction()
 
 string GetProgrammNameByRotor(string rotorName)
 {
+	var block = GridTerminalSystem.GetBlockWithName(rotorName) as IMyMotorStator;
+	int vel;
 
-    var block = GridTerminalSystem.GetBlockWithName(rotorName) as IMyMotorStator;
-    int vel;
-    if (block != null)
-    {   
-	vel = (int) Math.Round(block.Velocity / functionSwitchFactor);    
-    	if (programms.ContainsKey(vel))
-    	{
-		return programms[vel];
-    	}
-    }
-    return null;
+	if (block != null)
+	{   
+		vel = (int) Math.Round(block.Velocity / functionSwitchFactor);    
+		if (programms.ContainsKey(vel))
+		{
+			return programms[vel];
+		}
+	}
+	return null;
 }
 
 
@@ -291,6 +291,7 @@ IMyTerminalBlock getDumpBlock()
 void setDumpName(string str) 
 { 
 	var dumpBlock = getDumpBlock(); 
+	
 	if (dumpBlock != null)  
 	{ 
 		dumpBlock.SetCustomName(str);  
@@ -315,7 +316,13 @@ void clear()
  
 void dump(string str) 
 { 
-	setDumpName(getDumpName() + "\r\n" + "                                                                  " + str); 
+	setDumpName
+	(
+	 	getDumpName() + 
+		"\r\n" + 
+		"                                                                  " + 
+		str
+	); 
 }	 
 
 
