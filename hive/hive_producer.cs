@@ -1,3 +1,7 @@
+//original cargo counter, intended as base for  assembler control.
+//don't use. This version is outdated in respect to the changes made for the 8472 script
+//here for documentation purpose.
+
 string dumpName      = "computer-hive-01"; 
 string cargoName     = "Station Cargo";
 
