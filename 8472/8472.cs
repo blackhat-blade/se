@@ -44,8 +44,20 @@ void Main()
 
 void help()
 {
-	//clear();
-	dump("RTFM");
+	var keys = new int[programms.Count]; 
+	
+	programms.Keys.CopyTo(keys, 0); 
+	Array.Sort(keys); 
+	 
+	clear();
+	dump("Usage:");
+	
+	for (int i=0; i < programms.Count; ++i) 
+	{ 
+		int key = keys[i]; 
+		string tmp = String.Format("{0,-12}:{1,2}", programms[key], key * 3);
+		dump(tmp); 
+	} 
 }
 
 string chooseFunction()
