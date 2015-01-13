@@ -14,14 +14,80 @@ string[] 	cargoNames	= { "8472 Cargo", "8472 Drill" };
 string 		overallName 	= "8472 Cockpit"; 
 
 string 		dumpName 	= "8472 Cockpit"; 
+
+
 Dictionary<string, double> cargoAmount;
+
+
+Dumper dumper;
+
+public class Dumper
+{
+	string 			dumpBlockName;
+	IMyGridTerminalSystem 	GridTerminalSystem;
+
+	public Dumper(string blockName, IMyGridTerminalSystem gts)
+	{
+		dumpBlockName 		= blockName;
+		GridTerminalSystem 	= gts;
+	}
+
+	IMyTerminalBlock getDumpBlock() 
+	{ 
+		var oblocks = new List<IMyTerminalBlock>();  
+		GridTerminalSystem.SearchBlocksOfName(dumpBlockName, oblocks);  
+		IMyTerminalBlock dumpBlock = oblocks[0];  
+		 
+		return dumpBlock; 
+	 
+	} 
+	 
+	void setDumpName(string str) 
+	{ 
+		var dumpBlock = getDumpBlock(); 
+		
+		if (dumpBlock != null)  
+		{ 
+			dumpBlock.SetCustomName(str);  
+		}  
+	} 
+	 
+	string getDumpName() 
+	{ 
+		var dumpBlock = getDumpBlock(); 
+		 
+		if (dumpBlock != null)  
+		{ 
+			return dumpBlock.CustomName; 
+		} 
+		return "";	 
+	} 
+	 
+	public void clear() 
+	{ 
+		setDumpName(dumpBlockName); 
+	} 
+	 
+	public void dump(string str) 
+	{ 
+		setDumpName
+		(
+			getDumpName() + 
+			"\r\n" + 
+			"                                                                  " + 
+			str
+		); 
+	}	 
+}
 
 void Main()
 {
+	dumper = new Dumper(dumpName, GridTerminalSystem);
+
 	var newFunction = chooseFunction();
 	if (currentFunction != newFunction)
 	{
-		clear();
+		dumper.clear();
 		currentFunction = newFunction;
 	}
 
@@ -49,14 +115,14 @@ void help()
 	programms.Keys.CopyTo(keys, 0); 
 	Array.Sort(keys); 
 	 
-	clear();
-	dump("Usage:");
+	dumper.clear();
+	dumper.dump("Usage:");
 	
 	for (int i=0; i < programms.Count; ++i) 
 	{ 
 		int key = keys[i]; 
 		string tmp = String.Format("{0,-12}:{1,2}", programms[key], key * 3);
-		dump(tmp); 
+		dumper.dump(tmp); 
 	} 
 }
 
@@ -201,7 +267,7 @@ string Prefix(string input, object append)
 
 void displayCargo() 
 { 
-	clear(); 
+	dumper.clear(); 
 	initCargoAmount();
 
 	for (int i = 0; i < cargoNames.Length; ++i)
@@ -248,7 +314,7 @@ void dumpCargoAmount()
 	{ 
 		string key = keys[i]; 
 		string tmp = key + ":" + " " + cargoAmount[key].ToString("N0");  
-		dump(tmp); 
+		dumper.dump(tmp); 
 	} 
 }	 
 
@@ -290,51 +356,4 @@ void  addCargoItemAmount(string itemType, double val)
 	setCargoItemAmount(itemType, getCargoItemAmount(itemType) + val );  
 } 
  
-IMyTerminalBlock getDumpBlock() 
-{ 
-	var oblocks = new List<IMyTerminalBlock>();  
-	GridTerminalSystem.SearchBlocksOfName(dumpName, oblocks);  
-	IMyTerminalBlock dumpBlock = oblocks[0];  
-	 
-	return dumpBlock; 
- 
-} 
- 
-void setDumpName(string str) 
-{ 
-	var dumpBlock = getDumpBlock(); 
-	
-	if (dumpBlock != null)  
-	{ 
-		dumpBlock.SetCustomName(str);  
-	}  
-} 
- 
-string getDumpName() 
-{ 
-	var dumpBlock = getDumpBlock(); 
-	 
-	if (dumpBlock != null)  
-	{ 
-		return dumpBlock.CustomName; 
-	} 
-	return "";	 
-} 
- 
-void clear() 
-{ 
-	setDumpName(dumpName); 
-} 
- 
-void dump(string str) 
-{ 
-	setDumpName
-	(
-	 	getDumpName() + 
-		"\r\n" + 
-		"                                                                  " + 
-		str
-	); 
-}	 
-
 
