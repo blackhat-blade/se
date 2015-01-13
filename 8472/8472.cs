@@ -1,8 +1,7 @@
 string functionSwitchRotor = "FunctionSwitchRotor";
 string currentFunction;
-string defaultFunction = "displayLevel";
 
- Dictionary<int, string> programms = new Dictionary<int, string>{ 
+Dictionary<int, string> programms = new Dictionary<int, string>{ 
 						    { 0, "help" },
 						    { 3, "level" },
 						    { 6, "cargo" },
