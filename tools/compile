@@ -1,0 +1,75 @@
+#!perl
+use 5.014;
+use warnings;
+use File::Slurp;
+use File::Basename;
+
+my $assemblyPath = "C:/Program Files (x86)/Steam/SteamApps/common/SpaceEngineers/Bin64";
+my $compilerPath = "C:/Windows/Microsoft.NET/Framework64/v4.0.30319";
+my $tempDir      = ".";
+########
+
+my $compiler     = "csc.exe";
+ 
+my @assemblies   = 
+(
+	'Sandbox.Common.dll', 
+	'Sandbox.Game.dll', 
+	'VRage.Common.dll', 
+	'VRage.Library.dll', 
+	'VRage.Math.dll'
+);
+
+my $template = <<TEMPLATE;
+#pragma warning disable 649
+//using System;
+using System.Collections.Generic;
+//using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Sandbox.Common;
+using Sandbox.Common.Components;
+using Sandbox.Common.ObjectBuilders;
+using Sandbox.Definitions;
+using Sandbox.Engine;
+using Sandbox.ModAPI.Ingame;
+using Sandbox.ModAPI.Interfaces;
+using Sandbox.Game;
+ 
+namespace Scripts
+{
+    class TestClass
+    {
+        IMyGridTerminalSystem GridTerminalSystem;
+	#pragma warning restore
+	#line 1 "%s"
+	%s
+    }
+}
+TEMPLATE
+
+my $file        = shift;
+my $content     = read_file($file);
+my $basename    = File::Basename::basename($file);
+my $compileable = sprintf $template, $basename, $content;
+my $tempfile    = "$tempDir/$file.compiletemp." . time . ".cs";
+
+my $outfile = "$tempfile.out";
+
+write_file($tempfile, $compileable);
+
+open DUP, ">&STDOUT" or die "can't dup: $!";
+open STDOUT, ">", $outfile or die "can't redir stdout $!"; 
+      system "$compilerPath/$compiler", 
+       (map {"/r:$assemblyPath/$_" } @assemblies), 
+       "/t:library",
+      $tempfile;
+close STDOUT or die "can't close stdout $!";
+open  STDOUT, ">&DUP" or die "can't restore stdout $!";
+close DUP or die "can't close DUP: $!";
+
+my @res = read_file($outfile);
+foreach (@res)
+{
+	/\Q$basename\E\(\d+,\d+\): error/ && print;	
+}
