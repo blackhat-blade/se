@@ -6,7 +6,7 @@ use File::Basename;
 
 my $assemblyPath = "C:/Program Files (x86)/Steam/SteamApps/common/SpaceEngineers/Bin64";
 my $compilerPath = "C:/Windows/Microsoft.NET/Framework64/v4.0.30319";
-my $tempDir      = ".";
+my $tempDir      = "C:/Users/blade/Documents/dev/build/se";
 ########
 
 my $compiler     = "csc.exe";
@@ -22,7 +22,7 @@ my @assemblies   =
 
 my $template = <<TEMPLATE;
 #pragma warning disable 649
-//using System;
+using System;
 using System.Collections.Generic;
 //using System.Linq;
 using System.Text;
@@ -54,16 +54,19 @@ my $basename    = File::Basename::basename($file);
 my $compileable = sprintf $template, $basename, $content;
 my $tempfile    = "$tempDir/$file.compiletemp." . time . ".cs";
 
-my $outfile = "$tempfile.out";
-
+my $outfile  = "$tempfile.out";
+my $cscinput = $tempfile =~ s!/!\\!gr; #csc doesn't like / in input paths.
+my $dllname  = "$tempfile.dll"; 
+ 
 write_file($tempfile, $compileable);
 
 open DUP, ">&STDOUT" or die "can't dup: $!";
 open STDOUT, ">", $outfile or die "can't redir stdout $!"; 
       system "$compilerPath/$compiler", 
        (map {"/r:$assemblyPath/$_" } @assemblies), 
-       "/t:library",
-      $tempfile;
+       "/t:library", 
+       "/out:$dllname", 
+      $cscinput;
 close STDOUT or die "can't close stdout $!";
 open  STDOUT, ">&DUP" or die "can't restore stdout $!";
 close DUP or die "can't close DUP: $!";
@@ -71,5 +74,10 @@ close DUP or die "can't close DUP: $!";
 my @res = read_file($outfile);
 foreach (@res)
 {
-	/\Q$basename\E\(\d+,\d+\): error/ && print;	
+	if (/\Q$basename\E\(\d+,\d+\): error/)
+	{
+		# csc prints wrong path here due #line pragma. here we fix it.
+		s/^.*(?=\Q$basename\E)//;
+		print;
+	}	
 }
