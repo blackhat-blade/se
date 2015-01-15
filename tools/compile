@@ -7,6 +7,7 @@ use File::Basename;
 my $assemblyPath = "C:/Program Files (x86)/Steam/SteamApps/common/SpaceEngineers/Bin64";
 my $compilerPath = "C:/Windows/Microsoft.NET/Framework64/v4.0.30319";
 my $tempDir      = "C:/Users/blade/Documents/dev/build/se";
+my $buildTool    = "C:/Users/blade/Documents/dev/rep/se/tools/build";
 ########
 
 my $compiler     = "csc.exe";
@@ -51,13 +52,29 @@ TEMPLATE
 my $file        = shift;
 my $content     = read_file($file);
 my $basename    = File::Basename::basename($file);
-my $compileable = sprintf $template, $basename, $content;
+my $compileable;
 my $tempfile    = "$tempDir/$file.compiletemp." . time . ".cs";
 
 my $outfile  = "$tempfile.out";
 my $cscinput = $tempfile =~ s!/!\\!gr; #csc doesn't like / in input paths.
 my $dllname  = "$tempfile.dll"; 
+
+if ($content =~ /^#use\s+/)
+{
+	if (!$buildTool || -e !$buildTool)
+	{
+		die "#use directive found but build tool not available. Consider configuring build tool";
+	}
+
+	$content = `$^X $buildTool --infile "$file" --out - --cscerrors`; 
+	
+	die "exec of buildTool ($buildTool) failed $!" if $!;
+	
+	exit 1 if $? >> 8 == 1; #buildtool found some errors in the sourcefile, report them. 
+		
+}
  
+$compileable = sprintf $template, $basename, $content;
 write_file($tempfile, $compileable);
 
 open DUP, ">&STDOUT" or die "can't dup: $!";

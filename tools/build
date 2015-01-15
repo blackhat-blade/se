@@ -6,7 +6,7 @@ use Data::Dumper;
 use File::Slurp;
 use Getopt::Long 2.42 qw/HelpMessage :config auto_help auto_version/;
 
-our $VERSION = 0.1;
+our $VERSION = 0.2;
 
 our @libdir  = ('./lib', '../lib');
 our $debug   = 0;
@@ -14,12 +14,21 @@ my $infile   = '';
 my $outfile  = '';
 my %libs;
 my $curfile = '';
+my %pos;
+my $cscerrors = '';
 
 sub error
 {
 	my $msg = shift;
-	 
-	say STDERR "Error at: ", $curfile, " line ", $., " : ", $msg;
+	
+	if ($cscerrors)
+	{
+		say STDERR "$curfile($.,0):", " error CS666: ", $msg;
+	}
+	else
+	{
+		say STDERR "Error at: ", $curfile, " line ", $., " : ", $msg;
+	}
 	exit 1;
 }
 
@@ -48,6 +57,7 @@ sub parse
 		{
 			debug("adding $1 to lib list");
 			$libs{$1} = 0;
+			$pos{$1}  = [$curfile, $.]; #tracks location for better debugging missing libs.
 		}
 	}
 	else
@@ -75,7 +85,7 @@ sub find
 			return $try;
 		}
 	}
-	
+	($curfile, $.) = @{$pos{$lib}}; #retrieves location of first request
 	error "can't find sourcefile for $lib in @libdir";
 }
 
@@ -166,7 +176,7 @@ sub run
 }
 
 
-GetOptions('infile=s' => \$infile, 'outfile=s' => \$outfile, verbose => \$debug, 'libdirs=s' => \@libdir);
+GetOptions('infile=s' => \$infile, 'outfile=s' => \$outfile, verbose => \$debug, 'libdirs=s' => \@libdir, cscerrors => \$cscerrors);
 
 unless ($infile)
 {
