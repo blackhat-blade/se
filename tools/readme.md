@@ -11,3 +11,16 @@ perl compile FILE.cs
 
 ### known issues
 FILE.cs must be in current directory. Paths won't work 
+
+## build
+an unsophiscated tool to glue together csharp sources for space engineer scripts
+
+### install
+copy it somewhere
+
+### usage
+perl build FILE.cs
+see build.readme.md for documentation
+
+### known issues
+refer to documentation
