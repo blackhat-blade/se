@@ -8,4 +8,6 @@ adapt the paths to your system.
 
 ### usage
 perl compile FILE.cs   
-  
+
+### known issues
+FILE.cs must be in current directory. Paths won't work 
