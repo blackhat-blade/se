@@ -28,26 +28,19 @@ void init()
 	dumper  = new Dumper(dumpName, GridTerminalSystem);
 	foobar  = new Inventarizer(cargoNames, GridTerminalSystem, dumper);
         leveler = new CargoLeveler(overallName, cargoNames, GridTerminalSystem);
-	dumper.dump("foo");
+	
 	ui = new MultiplexInterfaceRotor(GridTerminalSystem);
 	m  = new Multiplexer(ui);
 	h  = new MultiplexHelp(dumper, m);
-
 	m.addJob(h);
 
 }
 
 void Main()
 {
-	try 
-	{
-		init();
-		m.run();
-	}
-	catch (Exception e)
-	{
-		dumper.dump(e.ToString());
-	}
+	init();
+	m.run();
+	
 }
 // B3rT 
  
@@ -80,7 +73,7 @@ public class MultiplexInterfaceRotor :  MultiplexInterface
 	int    			factor;
 	IMyGridTerminalSystem  	GridTerminalSystem;
 
-	public  MultiplexInterfaceRotor(	IMyGridTerminalSystem  	gts, 
+	public  MultiplexInterfaceRotor(IMyGridTerminalSystem  	gts, 
 					string name = "FunctionSwitchRotor", 
 					int f = 3)
 	{
@@ -90,7 +83,7 @@ public class MultiplexInterfaceRotor :  MultiplexInterface
 	}
 
 		
-	public int getJobId()
+	public override int getJobId()
 	{
 		var block = GridTerminalSystem.GetBlockWithName(rotorName) as IMyMotorStator;
 		int vel;
@@ -103,7 +96,7 @@ public class MultiplexInterfaceRotor :  MultiplexInterface
 		return 0;
 	}
 
-	public string translateJobId(int id)
+	public override string translateJobId(int id)
 	{
 		return (id * factor).ToString();
 	}
@@ -135,20 +128,25 @@ public class Multiplexed
 
 public class MultiplexedOff : Multiplexed
 {
-	string name        = "Off";
-	string description = "No foreground function will be executed";
+
+	public MultiplexedOff()
+	{ 
+		name        = "Off"; 
+		description = "No foreground function will be executed";
+	}
 }
 
 public class MultiplexHelp  : Multiplexed
 {
-	string name        = "Help";		
-	string description = "Show this help";
-
 	Dumper dumper;
 	Multiplexer mpx;
 
-	public MultiplexHelp (Dumper dumper, Multiplexer mpx)
+	public MultiplexHelp (Dumper d, Multiplexer m)
 	{
+		name        = "Help";		
+		description = "Show this help";
+		dumper 	    = d;
+		mpx	    = m;
 	}	
 
 
@@ -159,13 +157,12 @@ public class MultiplexHelp  : Multiplexed
 
 		jobs = mpx.getJobList();
 		dumper.clear();
-
-		for (i = 0; i < jobs.Length; ++i);
+		
+		for (i = 0; i < jobs.Length; i++)
 		{
 			string tmp;
-			var    info = mpx.getJobInfo(i);
+			var    info = mpx.getJobInfo(jobs[i]);
 			tmp         =  String.Format("{0}: {1} - {2}", info.uiid, info.name, info.description);
-			
 			dumper.dump(tmp);
 		}
 	}
@@ -176,10 +173,16 @@ public class MultiplexHelp  : Multiplexed
 	}
 }
 
-public interface MultiplexInterface
+public class MultiplexInterface
 {
-	int getJobId();
-	string translateJobId(int id);
+	public virtual int getJobId()
+	{
+		return 0;
+	}
+	public virtual string translateJobId(int id)
+	{
+		return "";
+	}
 	
 	
 }
@@ -199,9 +202,9 @@ public class Multiplexer
 	MultiplexInterface ui; 
 	Multiplexed defaultJob;
 
-
-	public Multiplexer(MultiplexInterface ui, List<Multiplexed> joblist = null)
+	public Multiplexer(MultiplexInterface mui, List<Multiplexed> joblist = null)
 	{
+		ui = mui;
 		current    = new MultiplexedOff();
 		defaultJob = current;
 		jobs       = new Dictionary<int, Multiplexed>();
@@ -226,6 +229,7 @@ public class Multiplexer
 
 	Multiplexed nextJob()
 	{
+
 		int jobId = ui.getJobId();
 		
 		if (jobs.ContainsKey(jobId))
@@ -237,10 +241,12 @@ public class Multiplexer
 
 	public void run()
 	{
+		
 		var next = nextJob();
 		
 		if (current != next)
 		{
+
 			current.deactivate();
 			next.activate();
 			current = next;
