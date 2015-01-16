@@ -5,8 +5,9 @@ use warnings;
 use Data::Dumper;
 use File::Slurp;
 use Getopt::Long 2.42 qw/HelpMessage :config auto_help auto_version/;
+use Cwd qw(abs_path);
 
-our $VERSION = 0.3;
+our $VERSION = 0.4;
 
 our @libdir  = ('./lib', '../lib');
 our $debug   = 0;
@@ -15,7 +16,9 @@ my $outfile  = '';
 my %libs;
 my $curfile = '';
 my %pos;
-my $cscerrors = '';
+my $cscerrors  = '';
+my $debugBuild = '';
+my %libLoc;
 
 sub error
 {
@@ -82,6 +85,7 @@ sub find
 		if (-e $try)
 		{
 			debug "found $try";
+			$libLoc{$lib} = abs_path($try);
 			return $try;
 		}
 	}
@@ -161,7 +165,7 @@ sub build
 
 	$out  = delete $libs{'@IN'};
 	$out .= "\n\n//end main code\n//everything below has been added by build tool\n";
-	$out .= join "\n", map {"//code for: $_\n" . $libs{$_} . "\n//end $_\n"} sort keys %libs; 
+	$out .= join "\n", map { ($debugBuild ? qq!#line 1 "! . $libLoc{$_}  . qq!"\n!: '') .  "//code for: $_\n" . $libs{$_} . "\n//end $_\n"} sort keys %libs; 
 
 	write_file $outfile, $out or die "couldn't write file ($outfile): $!";
 
@@ -176,7 +180,7 @@ sub run
 }
 
 
-GetOptions('infile=s' => \$infile, 'outfile=s' => \$outfile, verbose => \$debug, 'libdirs=s' => \@libdir, cscerrors => \$cscerrors);
+GetOptions('infile=s' => \$infile, 'outfile=s' => \$outfile, verbose => \$debug, 'libdirs=s' => \@libdir, cscerrors => \$cscerrors, debug => \$debugBuild);
 
 unless ($infile)
 {

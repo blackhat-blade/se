@@ -66,7 +66,7 @@ if ($content =~ /^#use\s+/)
 		die "#use directive found but build tool not available. Consider configuring build tool";
 	}
 
-	$content = `$^X $buildTool --infile "$file" --out - --cscerrors`; 
+	$content = `$^X $buildTool --infile "$file" --out - --cscerrors --debug`; 
 	
 	die "exec of buildTool ($buildTool) failed $!" if $!;
 	
@@ -97,4 +97,11 @@ foreach (@res)
 		s/^.*(?=\Q$basename\E)//;
 		print;
 	}	
+	elsif (/error|Fehler/)
+	{
+		# some other error, probably in a lib
+		print;
+	}
 }
+
+exit $?;
