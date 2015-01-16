@@ -6,7 +6,7 @@ use Data::Dumper;
 use File::Slurp;
 use Getopt::Long 2.42 qw/HelpMessage :config auto_help auto_version/;
 
-our $VERSION = 0.2;
+our $VERSION = 0.3;
 
 our @libdir  = ('./lib', '../lib');
 our $debug   = 0;
@@ -202,6 +202,17 @@ if ($outfile eq '-')
 	$outfile = \*STDOUT;
 }
 
+if ($outfile eq '-CB')
+{
+	debug ("output to clipboard requested, checking for Win32::Clipboard");
+	eval 'require Win32::Clipboard';
+	error "Output to clipboard requested, but require Win32::Clipboard failed: $@" if $@;
+	
+	no warnings 'redefine'; # don't try this at home boys.
+	*write_file = sub {Win32::Clipboard::Set($_[1])};
+
+}
+
 unless ($outfile)
 {
 	$outfile = "$infile.out";
@@ -222,6 +233,7 @@ build - an unsophiscated tool to glue together csharp sources for space engineer
   If OUTFILE is - STDOUT will be used.
   If INFILE is - and OUTFILE ist not specified STDOUT will be used.
   If INFILE is not - and OUTFILE is not specified INFILE.out will be used
+  If OUTFILE is -CB  output is written to the system clipboard
 
   Libdirs default to './lib' and '../lib'
   	
