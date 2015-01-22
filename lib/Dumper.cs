@@ -13,10 +13,15 @@ public class Dumper
 	{ 
 		var oblocks = new List<IMyTerminalBlock>();  
 		GridTerminalSystem.SearchBlocksOfName(dumpBlockName, oblocks);  
-		IMyTerminalBlock dumpBlock = oblocks[0];  
-		 
-		return dumpBlock; 
-	 
+                if (oblocks.Count > 0)
+                {
+                    IMyTerminalBlock dumpBlock = oblocks[0];
+                    return dumpBlock;
+                }
+                else
+                {
+                    return null;
+                }
 	} 
 	 
 	void setDumpName(string str) 
