@@ -20,11 +20,6 @@ public class Hibernate
         {
                 GridTerminalSystem = gts;
                 identifier = gts.GetBlockWithName(shipIdentifier);
-                
-                if (identifier == null)
-                {
-                        throw new Exception("Hibernate: No ship identifier found");
-                }
         }
         
         public void Run(IMyGridTerminalSystem gts)
@@ -35,6 +30,8 @@ public class Hibernate
         
         public void Run()
         {
+                if (identifier == null) return;
+
                 bool checkDock = CheckConnectors();
                 
                 // if ship is docked set 'isDocked' to true and deactivate the blocks
@@ -116,15 +113,21 @@ public class Hibernate
         * relevant blocks are currently:
         * - Thrusters
         * - Lighting
+        * - Antennas
+        * - Beacons
         */
         public List<IMyTerminalBlock> GetHibernationBlocks()
         {
-                var thrusters = GetBlocksInSameGrid<IMyThrust>();
-                var lights = GetBlocksInSameGrid<IMyLightingBlock>();
+                var blocks = new List<IMyTerminalBlock>();
                 
-                thrusters.AddList(lights);
+                blocks.AddList(GetBlocksInSameGrid<IMyThrust>());
+                blocks.AddList(GetBlocksInSameGrid<IMyLightingBlock>());
+                blocks.AddList(GetBlocksInSameGrid<IMyRadioAntenna>());
+                blocks.AddList(GetBlocksInSameGrid<IMyBeacon>());
                 
-                return thrusters;
+                
+                
+                return blocks;
                 
         }
         
