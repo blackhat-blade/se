@@ -13,7 +13,14 @@ public class AirLockDoor
 
 	IMyTerminalBlock by_name(string n)
 	{
-		
+		var blocks = new List<IMyTerminalBlock>();
+		gts.SearchBlocksOfName(n, blocks);
+
+		if (blocks.Count > 0 )
+		{
+			return blocks[0];
+		}
+		return null;
 	}
 
 	void 
