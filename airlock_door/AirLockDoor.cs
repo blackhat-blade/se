@@ -9,6 +9,9 @@ public class AirLockDoor
 	public AirLockDoor (string n1, string n2 IMyGridTerminalSystem gts)
 	{
 		GTS       = gts;
+		DOOR_1	  = by_name(n1);
+		DOOR_2	  = by_name(n2);
+	
 	}
 
 	IMyTerminalBlock by_name(string n)
@@ -23,5 +26,11 @@ public class AirLockDoor
 		return null;
 	}
 
-	void 
+	
+
+}
+
+void Main()
+{
+	var airlock = new AirLockDoor("Airlock Top", "Airlock Bottom", GridTerminalSystem);
 }
